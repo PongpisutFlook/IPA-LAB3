@@ -1,2 +1,5 @@
 ./ipa-lab3
-*.py
+__pycache__
+venv
+script.py
+netmiko_debug.log
