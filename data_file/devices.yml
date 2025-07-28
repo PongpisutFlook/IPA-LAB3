@@ -1,0 +1,52 @@
+devices:
+  - name: R1
+    type: router
+    ospf_process: 1
+    vrf: control-data
+    ospf_networks:
+      - network: 10.1.0.0 0.0.0.255
+        area: 0
+      - network: 10.2.0.0 0.0.0.255
+        area: 0
+      - network: 1.1.1.1 0.0.0.0
+        area: 0
+
+  - name: R2
+    type: router
+    ospf_process: 1
+    vrf: control-data
+    default_originate: true
+    ospf_networks:
+      - network: 10.3.0.0 0.0.0.255
+        area: 0
+      - network: 10.2.0.0 0.0.0.255
+        area: 0
+      - network: 2.2.2.2 0.0.0.0
+        area: 0
+    interfaces:
+      - name: Gi0/1
+        nat: inside
+      - name: Gi0/2
+        nat: inside
+      - name: Gi0/3
+        vrf: control-data
+        nat: outside
+        ip: dhcp
+    acl:
+      name: NAT_ACL
+      rules:
+        - 10.1.0.0 0.0.0.255
+        - 10.2.0.0 0.0.0.255
+        - 10.3.0.0 0.0.0.255
+    nat_source:
+      list: NAT_ACL
+      interface: GigabitEthernet0/3
+
+  - name: S1
+    type: switch
+    vlan:
+      id: 101
+      name: control
+      ports:
+        - gi0/1
+        - gi0/2

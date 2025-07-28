@@ -1,0 +1,43 @@
+{% if type == 'router' %}
+router ospf {{ ospf_process }} vrf {{ vrf }}
+{% for net in ospf_networks %}
+network {{ net.network }} area {{ net.area }}
+{% endfor %}
+{% if default_originate %}
+default-information originate
+{% endif %}
+exit
+{% for iface in interfaces %}
+interface {{ iface.name }}
+{% if iface.vrf is defined %}
+vrf forwarding {{ iface.vrf }}
+{% endif %}
+{% if iface.ip == 'dhcp' %}
+ip address dhcp
+{% else %}
+ip address {{ iface.ip }} {{ iface.netmask }}
+{% endif %}
+{% if iface.nat is defined %}
+ip nat {{ iface.nat }}
+{% endif %}
+no shutdown
+exit
+{% endfor %}
+{% if acl is defined %}
+ip access-list standard {{ acl.name }}
+{% for rule in acl.rules %}
+permit {{ rule }}
+{% endfor %}
+exit
+{% endif %}
+{% if nat_source is defined %}
+ip nat inside source list {{ nat_source.list }} interface {{ nat_source.interface }} vrf {{ vrf }} overload
+{% endif %}
+{% elif type == 'switch' %}
+vlan {{ vlan.id }}
+name {{ vlan.name }}
+exit
+interface range {{ vlan.ports | join('-') }}
+switchport mode access
+switchport access vlan {{ vlan.id }}
+{% endif %}
