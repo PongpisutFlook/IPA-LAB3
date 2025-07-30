@@ -3,3 +3,4 @@ __pycache__
 venv
 script.py
 netmiko_debug.log
+.pytest_cache
